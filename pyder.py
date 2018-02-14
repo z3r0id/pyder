@@ -103,11 +103,37 @@ def port_scanner():
     target = input("Please type target URL or IP:")
     targetip = socket.gethostbyname(target)
 
+    openports = []
+    ports_file = open("open_ports.txt", "w")
+
     print("Starting scan on " + targetip)
     print("-" * 60)
     print("Please wait, scanning remote host")
     print("-" * 60)
 
+    try:
+        for port in range(1, 1024):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex((targetip, port))
+            if result == 0:
+                print("Port {}:    Open".format(port))
+                openports.append(port)
+            sock.close()
+
+        for item in openports:
+            ports_file.write("Found open ports: \n")
+            ports_file.write(str(item))
+
+    except KeyboardInterrupt:
+        print("You pressed Ctrl +C")
+    except socket.gaierror:
+        print("Hostname could not be resolved. Exiting.")
+    except socket.error:
+        print("Could not connect to server.")
+
+    print("PORT SCAN COMPLETE!")
+    print(" Found ", len(openports), "open ports")
+    print(openports, '\n')
 
 #############
 # MAIN MENU #

@@ -42,10 +42,8 @@
 # generate possible CVEs
 # Export all data to document
 import socket
-
 from bs4 import BeautifulSoup
 import urllib.request
-import requests
 
 #############
 # SPIDERING #
@@ -66,9 +64,9 @@ def url_spider():
         if link not in link_list:
             link_list.append(link)
 
-    print("Initial links found: ")
-    for item in link_list:
-        print(item, '\n')
+    print("Initial links scanned. Following. ")
+    # for item in link_list:
+    #    print(item, '\n')
 
     counter = 0
     while counter < len(init_links):
@@ -135,16 +133,54 @@ def port_scanner():
     print(" Found ", len(openports), "open ports")
     print(openports, '\n')
 
+###############
+# SQLi Tester #
+###############
+
+def SQLi_Tester():
+
+    read_file = open("crawl_results.txt", "r")
+    results_file = open("SQLi_results", "w")
+    results_file.write("Pages vulnerable to SQLi:")
+
+    total_links = len(open("crawl_results.txt", "r").readlines())
+    counter = 0
+
+    while counter < total_links:
+        try:
+            for link in read_file:
+                print("Testing target ", counter, " out of ", total_links)
+                # add the testing code to the end of the link below
+                target = urllib.request.urlopen(link)
+                result = target.read()
+                decoded_result = result.decode('utf-8')
+                if "error" and "SQL" in decoded_result:
+                    print("The page ", link, " might be vulnerable to SQLi!")
+                    results_file.write(link)
+                    continue
+                counter += 1
+
+        except urllib.error.HTTPError:
+            print("Could not test link!")
+            counter += 1
+
 #############
 # MAIN MENU #
 #############
 while True:
 
+    print("0. Run it all!")
     print("1. Spider a website")
     print("2. Run a port scan")
+    print("3. SQL injection tester")
     selection = input("Please make a selection:")
 
-    if selection == str('1'):
+    if selection == '0':
         url_spider()
-    elif selection == str('2'):
         port_scanner()
+    elif selection == '1':
+        url_spider()
+    elif selection == '2':
+        port_scanner()
+    elif selection == '3':
+        SQLi_Tester()
